@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babalar Günün Kutlu Olsun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Dancing+Script:wght@600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-cream:#F6EEDD;
+    --color-cream-soft:#FBF7EC;
+    --color-cream-deep:#EDE1C5;
+    --color-walnut:#3B2A1E;
+    --color-walnut-soft:#7C6650;
+    --color-burgundy:#8A3A24;
+    --color-burgundy-light:#AC5538;
+    --color-gold:#C7973E;
+    --color-gold-light:#DFB868;
+    --color-teal:#355E3B;
+    --color-teal-light:#557A5C;
+    --font-display:'Fraunces', Georgia, serif;
+    --font-script:'Dancing Script', cursive;
+    --font-ui:'Outfit', sans-serif;
+    --ease-soft: cubic-bezier(.22,.61,.36,1);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:var(--font-ui);
+    color:var(--color-walnut);
+    background:radial-gradient(circle at 50% -10%, var(--color-cream-soft), var(--color-cream) 55%, var(--color-cream-deep) 100%);
+    transition:background 1.2s var(--ease-soft);
+    overflow-x:hidden;
+  }
+  body.is-celebrating{
+    background:radial-gradient(circle at 50% 25%, #FCEFD2, var(--color-cream) 58%, #F2DCAE 100%);
+  }
+  h1,p{margin:0;}
+  button{font-family:inherit;}
+
+  #fx-canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:50;
+  }
+
+  .stage{
+    position:relative;
+    min-height:100vh;
+    min-height:100dvh;
+  }
+
+  .screen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    opacity:0;
+    transform:scale(.96) translateY(16px);
+    pointer-events:none;
+    transition:opacity .7s var(--ease-soft), transform .7s var(--ease-soft);
+    z-index:1;
+  }
+  .screen.is-active{
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+    z-index:2;
+  }
+
+  /* ---------- Postcard (shared base for screens 1 & 2) ---------- */
+  .postcard{
+    position:relative;
+    width:100%;
+    max-width:420px;
+    background:var(--color-cream-soft);
+    border:1.5px solid rgba(62,43,31,.55);
+    border-radius:10px;
+    box-shadow:0 18px 45px -18px rgba(62,43,31,.35), 0 2px 0 rgba(62,43,31,.04) inset;
+    padding:46px 34px 38px;
+    text-align:center;
+  }
+  .postcard::after{
+    content:"";
+    position:absolute;
+    top:18px;
+    right:64px;
+    width:46px;
+    height:46px;
+    border:1.5px dashed rgba(138,58,36,.28);
+    border-radius:50%;
+    pointer-events:none;
+  }
+  .postcard__stamp{
+    position:absolute;
+    top:-16px;
+    right:-12px;
+    width:54px;
+    height:66px;
+    background:var(--color-cream);
+    border:2px dashed rgba(62,43,31,.4);
+    border-radius:3px;
+    transform:rotate(-8deg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 14px -6px rgba(62,43,31,.3);
+  }
+  .postcard__eyebrow{
+    font-size:.74rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--color-walnut-soft);
+    margin-bottom:18px;
+  }
+  .postcard__divider{
+    border:none;
+    border-top:1.5px dashed rgba(62,43,31,.25);
+    margin:0 auto 26px;
+    width:70%;
+  }
+  .postcard__hint{
+    margin-top:20px;
+    font-size:.85rem;
+    color:var(--color-walnut-soft);
+    font-style:italic;
+    font-family:var(--font-display);
+  }
+
+  /* ---------- Wax-seal button ---------- */
+  .seal-wrap{ display:flex; justify-content:center; }
+  .seal-button{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:142px;
+    height:142px;
+    border-radius:49% 51% 48% 52% / 52% 48% 53% 47%;
+    background:radial-gradient(circle at 34% 28%, var(--color-burgundy-light), var(--color-burgundy) 60%, #5e211c 100%);
+    box-shadow:0 14px 28px -10px rgba(138,58,36,.55), 0 0 0 5px rgba(199,151,62,.35);
+    color:var(--color-cream-soft);
+    font-family:var(--font-ui);
+    font-weight:600;
+    font-size:1rem;
+    letter-spacing:.04em;
+    line-height:1.3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    animation:seal-pulse 2.6s ease-in-out infinite;
+    transition:transform .35s var(--ease-soft), box-shadow .35s var(--ease-soft);
+  }
+  .seal-button:hover{
+    transform:scale(1.045);
+    box-shadow:0 18px 34px -10px rgba(138,58,36,.6), 0 0 0 6px rgba(199,151,62,.45);
+  }
+  .seal-button:active{ transform:scale(.97); }
+  .seal-button:focus-visible{
+    outline:3px solid var(--color-teal);
+    outline-offset:5px;
+  }
+  @keyframes seal-pulse{
+    0%,100%{ box-shadow:0 14px 28px -10px rgba(138,58,36,.55), 0 0 0 5px rgba(199,151,62,.35); }
+    50%{ box-shadow:0 14px 28px -10px rgba(138,58,36,.55), 0 0 0 9px rgba(199,151,62,.2); }
+  }
+
+  /* ---------- Screen 2: letter / form ---------- */
+  .letter__eyebrow{
+    font-size:.74rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--color-walnut-soft);
+    margin-bottom:8px;
+  }
+  .letter__title{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:600;
+    font-size:clamp(1.5rem, 4vw, 1.9rem);
+    margin-bottom:30px;
+    color:var(--color-walnut);
+  }
+  .field-row{
+    display:flex;
+    gap:22px;
+    margin-bottom:30px;
+    text-align:left;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+  }
+  .field__label{
+    font-size:.72rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--color-walnut-soft);
+  }
+  .field__input{
+    font-family:var(--font-display);
+    font-size:1.1rem;
+    color:var(--color-walnut);
+    background:transparent;
+    border:none;
+    border-bottom:2px solid rgba(62,43,31,.25);
+    padding:8px 4px;
+    transition:border-color .3s var(--ease-soft), background-color .3s var(--ease-soft);
+  }
+  .field__input::placeholder{ color:rgba(62,43,31,.32); font-style:italic; }
+  .field__input:focus{
+    outline:none;
+    border-color:var(--color-teal);
+    background:rgba(47,93,90,.06);
+  }
+  .field--error .field__input{ border-color:var(--color-burgundy); }
+  .field__error{
+    font-size:.72rem;
+    color:var(--color-burgundy);
+    min-height:14px;
+    opacity:0;
+    transition:opacity .25s var(--ease-soft);
+  }
+  .field--error .field__error{ opacity:1; }
+
+  .confirm-button{
+    appearance:none;
+    cursor:pointer;
+    border:1.5px solid var(--color-gold);
+    background:var(--color-burgundy);
+    color:var(--color-cream-soft);
+    font-weight:600;
+    font-size:.95rem;
+    letter-spacing:.04em;
+    padding:13px 38px;
+    border-radius:999px;
+    transition:transform .3s var(--ease-soft), background-color .3s var(--ease-soft), box-shadow .3s var(--ease-soft);
+    box-shadow:0 10px 22px -10px rgba(138,58,36,.55);
+  }
+  .confirm-button:hover{ background:var(--color-burgundy-light); transform:translateY(-2px); }
+  .confirm-button:active{ transform:translateY(0) scale(.97); }
+  .confirm-button:focus-visible{ outline:3px solid var(--color-teal); outline-offset:4px; }
+
+  .letter.shake{ animation:shake .45s var(--ease-soft); }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-8px); }
+    40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-5px); }
+    80%{ transform:translateX(3px); }
+  }
+
+  /* ---------- Screen 3: celebration ---------- */
+  .celebrate-content{ text-align:center; max-width:640px; }
+  .celebrate__seal{
+    font-family:var(--font-ui);
+    font-size:.78rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--color-teal);
+    margin-bottom:18px;
+  }
+  .celebrate__message{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:600;
+    font-size:clamp(1.7rem, 5.2vw, 3.1rem);
+    line-height:1.18;
+    color:var(--color-walnut);
+    text-shadow:0 2px 22px rgba(199,151,62,.4);
+  }
+  .celebrate__name{
+    font-family:var(--font-script);
+    font-style:normal;
+    font-weight:700;
+    font-size:clamp(2.1rem, 7.5vw, 4rem);
+    color:var(--color-burgundy);
+    display:inline-block;
+    line-height:1.1;
+  }
+  .celebrate__sub{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-size:clamp(1.05rem, 3vw, 1.4rem);
+    color:var(--color-teal);
+    margin-top:16px;
+  }
+  .celebrate-content.rise{ animation:rise-in 1.4s var(--ease-soft) both; }
+  @keyframes rise-in{
+    from{ opacity:0; transform:translateY(22px) scale(.97); }
+    to{ opacity:1; transform:none; }
+  }
+
+  @media (max-width:480px){
+    .postcard{ padding:38px 22px 30px; }
+    .field-row{ flex-direction:column; gap:18px; margin-bottom:26px; }
+    .seal-button{ width:118px; height:118px; font-size:.9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.2s !important;
+      scroll-behavior:auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fx-canvas" aria-hidden="true"></canvas>
+
+<main class="stage">
+
+  <!-- 1) Karşılama Ekranı -->
+  <section class="screen is-active" id="screen-welcome">
+    <div class="postcard">
+      <div class="postcard__stamp" aria-hidden="true">
+        <svg width="22" height="34" viewBox="0 0 22 34" fill="none">
+          <path d="M7 1 L15 1 L11 9 Z" fill="#8A3A24"/>
+          <path d="M8.3 9 L13.7 9 L17 30 L11 33 L5 30 Z" fill="#C7973E"/>
+        </svg>
+      </div>
+      <p class="postcard__eyebrow">Babalar Günü ‧ Sana özel</p>
+      <hr class="postcard__divider">
+      <div class="seal-wrap">
+        <button class="seal-button" id="btn-open" type="button" aria-label="Mührü aç ve devam et">
+          Buraya<br>Dokun
+        </button>
+      </div>
+      <p class="postcard__hint">Mühürlü, küçük bir sürpriz seni bekliyor</p>
+    </div>
+  </section>
+
+  <!-- 2) Veri Giriş Ekranı -->
+  <section class="screen" id="screen-form">
+    <div class="postcard letter" id="letter-card">
+      <p class="letter__eyebrow">Bu mektup kimden?</p>
+      <h1 class="letter__title">Adını yazar mısın?</h1>
+      <div id="form-names">
+        <div class="field-row">
+          <label class="field" id="field-first">
+            <span class="field__label">Ad</span>
+            <input class="field__input" type="text" id="input-first" name="firstName" placeholder="Örn. Mehmet" autocomplete="given-name">
+            <span class="field__error">Lütfen adını yaz</span>
+          </label>
+          <label class="field" id="field-last">
+            <span class="field__label">Soyad</span>
+            <input class="field__input" type="text" id="input-last" name="lastName" placeholder="Örn. Yılmaz" autocomplete="family-name">
+            <span class="field__error">Lütfen soyadını yaz</span>
+          </label>
+        </div>
+        <button class="confirm-button" type="button" id="btn-confirm">Onayla</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Kutlama ve Animasyon Ekranı -->
+  <section class="screen" id="screen-celebrate">
+    <div class="celebrate-content" id="celebrate-content">
+      <p class="celebrate__seal">Sevgiyle mühürlendi</p>
+      <h1 class="celebrate__message">
+        Babalar Günün Kutlu Olsun<br>
+        <span class="celebrate__name" id="celebrate-name">Baba</span><span>!</span>
+      </h1>
+      <p class="celebrate__sub">Sen harika bir babasın!</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ---------- Ekran geçişleri ----------
+  var screens = {
+    welcome: document.getElementById('screen-welcome'),
+    form: document.getElementById('screen-form'),
+    celebrate: document.getElementById('screen-celebrate')
+  };
+
+  function showScreen(name){
+    Object.keys(screens).forEach(function(key){
+      var el = screens[key];
+      if(key === name){
+        el.classList.add('is-active');
+        el.setAttribute('aria-hidden','false');
+      } else {
+        el.classList.remove('is-active');
+        el.setAttribute('aria-hidden','true');
+      }
+    });
+  }
+
+  document.getElementById('btn-open').addEventListener('click', function(){
+    showScreen('form');
+    setTimeout(function(){ document.getElementById('input-first').focus(); }, 600);
+  });
+
+  // ---------- Form doğrulama ----------
+  var inputFirst = document.getElementById('input-first');
+  var inputLast = document.getElementById('input-last');
+  var fieldFirst = document.getElementById('field-first');
+  var fieldLast = document.getElementById('field-last');
+  var letterCard = document.getElementById('letter-card');
+  var nameEl = document.getElementById('celebrate-name');
+  var celebrateContent = document.getElementById('celebrate-content');
+  var REVEAL_NAME = 'Abdurrahman Vural';
+
+  function markError(fieldEl){ fieldEl.classList.add('field--error'); }
+  function clearError(fieldEl){ fieldEl.classList.remove('field--error'); }
+
+  function confirmNames(){
+    var first = inputFirst.value.trim();
+    var last = inputLast.value.trim();
+    var valid = true;
+
+    if(!first){ markError(fieldFirst); valid = false; } else { clearError(fieldFirst); }
+    if(!last){ markError(fieldLast); valid = false; } else { clearError(fieldLast); }
+
+    if(!valid){
+      letterCard.classList.remove('shake');
+      void letterCard.offsetWidth;
+      letterCard.classList.add('shake');
+      return;
+    }
+
+    nameEl.textContent = REVEAL_NAME;
+    document.body.classList.add('is-celebrating');
+    showScreen('celebrate');
+
+    celebrateContent.classList.remove('rise');
+    void celebrateContent.offsetWidth;
+    celebrateContent.classList.add('rise');
+
+    startConfetti();
+    setTimeout(function(){ celebrateContent.setAttribute('tabindex','-1'); celebrateContent.focus(); }, 500);
+  }
+
+  document.getElementById('btn-confirm').addEventListener('click', confirmNames);
+
+  [inputFirst, inputLast].forEach(function(inputEl){
+    inputEl.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        confirmNames();
+      }
+    });
+  });
+
+  // ---------- Konfeti & havai fişek (canvas) ----------
+  var canvas = document.getElementById('fx-canvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = Math.max(window.devicePixelRatio || 1, 1);
+  var confettiPieces = [];
+  var fireworkParticles = [];
+  var animId = null;
+  var active = false;
+  var lastFireworkTime = 0;
+  var nextFireworkDelay = 800;
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var palette = ['#C7973E', '#8A3A24', '#355E3B', '#F6EEDD', '#AC5538'];
+
+  function resizeCanvas(){
+    dpr = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function createConfettiPiece(initial){
+    return {
+      x: Math.random() * window.innerWidth,
+      y: initial ? Math.random() * -window.innerHeight : -20,
+      w: 6 + Math.random() * 6,
+      h: 10 + Math.random() * 8,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.15,
+      speedY: 0.7 + Math.random() * 1.0,
+      speedX: (Math.random() - 0.5) * 0.6,
+      swayPhase: Math.random() * Math.PI * 2,
+      swaySpeed: 0.015 + Math.random() * 0.02
+    };
+  }
+
+  function initConfetti(){
+    confettiPieces = [];
+    var count = prefersReducedMotion ? 0 : (window.innerWidth < 600 ? 70 : 130);
+    for(var i = 0; i < count; i++) confettiPieces.push(createConfettiPiece(true));
+  }
+
+  function spawnFirework(){
+    var x = window.innerWidth * 0.15 + Math.random() * window.innerWidth * 0.7;
+    var y = window.innerHeight * 0.16 + Math.random() * window.innerHeight * 0.24;
+    var color = palette[Math.floor(Math.random() * palette.length)];
+    var count = 32 + Math.floor(Math.random() * 16);
+    for(var i = 0; i < count; i++){
+      var angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+      var speed = 1.4 + Math.random() * 2.2;
+      fireworkParticles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: color,
+        life: 1,
+        decay: 0.006 + Math.random() * 0.006,
+        size: 2 + Math.random() * 2
+      });
+    }
+  }
+
+  function drawConfetti(){
+    confettiPieces.forEach(function(p){
+      p.y += p.speedY;
+      p.swayPhase += p.swaySpeed;
+      p.x += p.speedX + Math.sin(p.swayPhase) * 0.6;
+      p.rotation += p.rotationSpeed;
+      if(p.y > window.innerHeight + 20){
+        var fresh = createConfettiPiece(false);
+        fresh.x = Math.random() * window.innerWidth;
+        Object.assign(p, fresh);
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+  }
+
+  function drawFireworks(){
+    fireworkParticles = fireworkParticles.filter(function(p){ return p.life > 0; });
+    fireworkParticles.forEach(function(p){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.035;
+      p.vx *= 0.99;
+      p.life -= p.decay;
+      ctx.save();
+      ctx.globalAlpha = Math.max(p.life, 0);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function loop(timestamp){
+    if(!active) return;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    drawConfetti();
+    drawFireworks();
+    if(!prefersReducedMotion && timestamp - lastFireworkTime > nextFireworkDelay){
+      spawnFirework();
+      lastFireworkTime = timestamp;
+      nextFireworkDelay = 900 + Math.random() * 900;
+    }
+    animId = requestAnimationFrame(loop);
+  }
+
+  function startConfetti(){
+    active = true;
+    initConfetti();
+    fireworkParticles = [];
+    lastFireworkTime = 0;
+    nextFireworkDelay = 300;
+    if(prefersReducedMotion){ spawnFirework(); }
+    animId = requestAnimationFrame(loop);
+  }
+
+  function stopConfetti(){
+    active = false;
+    if(animId) cancelAnimationFrame(animId);
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    confettiPieces = [];
+    fireworkParticles = [];
+  }
+</script>
+
+</body>
+</html>
